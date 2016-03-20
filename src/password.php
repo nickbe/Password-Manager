@@ -215,7 +215,7 @@ setInterval(countdown, 60000);
             </div>
             <div class="modal-body">
             <form>
-            <label class="form-control" id="details" style="height:230px; background:#efefef;" ></label>
+            <div class="form-control" id="details" style="height:230px; background:#efefef;" ></div>
             </form>
             </div>
             <div class="modal-footer">
