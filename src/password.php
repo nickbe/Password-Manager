@@ -215,7 +215,7 @@ setInterval(countdown, 60000);
             </div>
             <div class="modal-body">
             <form>
-            <div class="form-control" id="details" style="height:230px; background:#efefef;" ></div>
+            <div class="form-control" id="details" style="height:230px; background:#efefef; overflow:auto" ></div>
             </form>
             </div>
             <div class="modal-footer">
@@ -293,7 +293,7 @@ setInterval(countdown, 60000);
                     <div class="form-group">
                         <label for="importc" class="control-label">You can import passwords from CSV file or raw backup file. Select a .csv file or .raw file to start.</label>
                         <input type="file" id="importc" accept=".csv,.raw" />
-                        <label class="small" style="display:block; clear:both;">CSV file must contain a header line with columns called "name" and "password" - order is not important. You may edit your CSV with your password in Office so that the account field has a header called 'name' and the password field has a header called 'password'. Then you can save the CSV and open it again in plain text editor to copy contents.</label>
+                        <label class="small" style="display:block; clear:both;">CSV file must contain a header line with columns including "name" and "password" - order is not important. You may edit your CSV with your password in Office so that the account field has a header called 'name' and the password field has a header called 'password'. Other columns will only be imported if they have the same header name as one of your additional fields. Note your CSV file must be in UTF-8 encoding. If not, open your CSV in some plaintext editor and change the encoding to UTF-8 before importing.</label>
                     </div>
                 </form>
             </div>
@@ -374,6 +374,10 @@ function import_raw(json){
         }
         add_account(acc, pass, other, function(msg) { if(msg!=1) alert("Fail to add "+acc+", please try again manually later."); });
     }
+    function onsucc(){
+    	alert('IMPORT FINISHED!');
+        location.reload(true);
+    }
     function process(){
         var aeskey=json.KEY;
         var x;
@@ -384,10 +388,9 @@ function import_raw(json){
                 other = decryptchar(json.data[x][2], aeskey);
             add_acc(decryptchar(json.data[x][0],aeskey),decryptchar(json.data[x][1],aeskey), other);
         }
-        alert('IMPORT FINISHED!');
-        location.reload(true);
     }
-    setTimeout(process,50);
+    process();
+    setTimeout(onsucc,1000);
     
 }
 function import_csv(csv){
@@ -408,8 +411,11 @@ function import_csv(csv){
             }
             add_account(acc, pass, JSON.stringify(other), function(msg) { if(msg!=1) alert("Fail to add "+acc+", please try again manually later."); });
         }
-        alert('IMPORT FINISHED!');
-        location.reload(true);
+        function onsucc(){
+            alert('IMPORT FINISHED!');
+            location.reload(true);	
+        }
+        setTimeout(onsucc,1000);
     });
 }
 
@@ -765,9 +771,15 @@ $("#changepw").click(function(){
 });
 $("#importbtn").click(function(){ 
     $("#importbtn").attr("disabled",true);
-    $("#importbtn").attr("value", "Processing...");
+    $("#importbtn").html("Processing...");
     $("#importc").attr("disabled",true);
-    if (window.FileReader) {
+    function bk(){
+    	$("#importbtn").attr("disabled",false);
+        $("#importbtn").html("Submit");
+        $("#importc").attr("disabled",false);
+    }
+    function process(){
+        if (window.FileReader) {
 		// FileReader are supported.
         var reader = new FileReader();
         var a=$("#importc")[0].files;
@@ -781,17 +793,17 @@ $("#importbtn").click(function(){
             }
             reader.onerror = function (e) {
                 alert('Error reading file!');
+                bk();
             }
             var extension = a[0].name.split('.').pop().toLowerCase();
             if(extension=='csv') t=1;
             reader.readAsText(a[0]);          
-        } else alert('NO FILE SELECTED'); 
+        } else {alert('NO FILE SELECTED'); bk();}
 	} else {
 		alert('FileReader are not supported in this browser.');
 	}
-    $("#importbtn").attr("disabled",false);
-    $("#importbtn").attr("value", "Submit");
-    $("#importc").attr("disabled",false);
+    }
+    setTimeout(process,10);
 });
 $('#add').on('shown.bs.modal', function () { $('#newiteminput').focus(); });
 $('#edit').on('shown.bs.modal', function () {
@@ -861,7 +873,7 @@ function exportcsv()
 {
     var obj=new Array();
     timeout=100000;
-    alert('CSV file contains all your information in plain text format. It\'s dangerous to keep it as a backup. Only use it for transferring your data. Delete it immediately after you\'ve done.');
+    alert('CSV file contains all your information in plain text format. It\'s dangerous to keep it as a backup. Only use it for transferring your data. Delete it immediately after you\'ve done. Please note the encoding for the csv file is UTF-8. You might need to specify this encoding in order to open this CSV properly in some software that uses ANSI as default encoding such as Microsoft Office.');
     var t,x,i;
     for (x in accountarray){
         tmp={};
@@ -888,10 +900,14 @@ function exportcsv()
 function showdetail(index){
     var i=parseInt(index);
     var x,s;
-    s='<b>'+accountarray[i]["name"]+'</b><br><br>\n';
+    s='<b>'+accountarray[i]["name"]+'</b><br /><br />';
 	s=s+'<table style="width: 100%" font color="#ff0000">';
-	s=s+'<col width="90"><col width="auto">';
-    for (x in accountarray[i]["other"]) s=s+'<tr><td><font color="#afafaf"><style="font-weight: normal;">'+x+'</td><td><font color="#6d6d6d"><b>'+accountarray[i]["other"][x]+'<b></td></tr>';
+	s=s+'<colgroup><col width="90"><col width="auto"></colgroup>';
+    for (x in accountarray[i]["other"]) {
+        if(x in fields){
+            s=s+'<tr><td><font color="#afafaf"><style="font-weight: normal;">'+fields[x]['colname']+'</td><td><font color="#6d6d6d"><b>'+accountarray[i]["other"][x]+'<b></td></tr>';
+        }
+    }
     s=s+'</table>';
 	$('#details').html(s);
     $("#showdetails").modal("show");

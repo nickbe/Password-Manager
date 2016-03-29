@@ -7,7 +7,7 @@
 **'master' branch is a dev-branch, please download stable version from [SourceForge](https://sourceforge.net/projects/phppasswordmanager/files/latest/download) or [Release](https://github.com/zeruniverse/Password-Manager/releases) in order to use.**      
   
 ##Version
-v9.08  
+v9.08s  
 From v9.0, this project becomes mature. I've implemented all features planned when I started this project.       
 There will still be infrequent bug fixes and improvements though.  
 Supports are available [here](https://github.com/zeruniverse/Password-Manager/issues) for versions greater than v9.0   
@@ -42,8 +42,9 @@ Some part of information in Password_1 won't involve in calculations for identit
 ##Import/Export From/To Other Password Managers
 ###Import
 + Export your passwords from your password manager as csv file.
-+ Make sure there is a header line, the password and account name column must be named "password" and "name" respectively, order is not important. If you have other fields, you should customize your fields after login (in setting). All other columns not listed in fields in your setting are being ignored.
-+ Open the import dialog, paste the csv data and select csv as import type.
++ Make sure there is a header line, the password and account name column must be named "password" and "name" respectively, order is not important. If you have other fields, you should customize your fields after login (in setting). All other columns not listed in fields in your setting are being ignored.  
++ Open the import dialog, select the CSV file you want to import. CSV to be imported must be in UTF-8 encoding. If not, open it in some plaintext editor and change it to UTF-8 before importing.
+  
 ###Export
 + Login to your password manager, click [settings -> Export CSV]
 + Exported CSV are in UTF-8 encoding
